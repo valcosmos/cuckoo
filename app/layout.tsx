@@ -1,3 +1,5 @@
+import ClientProvider from '@/components/ClientProvider'
+import DataProvider from '@/components/DataProvider'
 import Header from '@/components/Header'
 import PromptInput from '@/components/PromptInput'
 import '@/styles/globals.css'
@@ -11,11 +13,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        {/* Header */}
-        <Header />
-        {/* prompt input*/}
-        <PromptInput />
-        {children}
+        <DataProvider>
+          <ClientProvider>
+            {/* Header */}
+            <Header />
+            {/* prompt input*/}
+            <PromptInput />
+            {children}
+          </ClientProvider>
+        </DataProvider>
       </body>
     </html>
   )

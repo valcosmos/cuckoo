@@ -1,17 +1,73 @@
 'use client'
 
-import { useState } from 'react'
+import { FormEvent, useContext, useState } from 'react'
+import useSWR from 'swr'
+import { v4 as uuidv4 } from 'uuid'
+import { DataContext } from './DataProvider'
+import { toast } from 'react-hot-toast'
 
 export default function PromptInput() {
   const [input, setInput] = useState('')
+  const { images, setImages } = useContext(DataContext)
+
+  const submitPrompt = async (useSuggestion?: boolean) => {
+    setInput('')
+    const id = uuidv4()
+    const dataObj: ImageProps = {
+      name: input,
+      id,
+      url: '',
+      isLoading: true
+    }
+
+    await setImages((prev) => [dataObj, ...prev!])
+
+    const res = await fetch('/api/generateImage', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ prompt: input })
+    })
+    const data = await res.json()
+
+    if (data.msg) {
+      await setImages(prev => { 
+        const arr = [...prev!]
+        const index = prev!.findIndex(item => item.id === id)
+        arr.splice(index, 1)
+        return arr
+      })
+      return toast.error(data.msg)
+    }
+    const url = data.url
+
+    
+
+    await setImages((prev) => {
+      const index = prev!.findIndex((item) => item.id === id)
+      const arr = [...prev!]
+      arr?.splice(index, 1, { ...dataObj, isLoading: false, url })
+      return arr
+    })
+  }
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    await submitPrompt()
+  }
 
   return (
     <div className="m-10">
-      <form className="flex flex-col border rounded-md shadow-md lg:flex-row shadow-slate-400/10 lg:divide-x">
-        <textarea
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col border rounded-md shadow-md lg:flex-row shadow-slate-400/10 lg:divide-x"
+      >
+        <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Enter a prompt..."
+          placeholder={'Enter a prompt...'}
           className="flex-1 p-4 rounded-md outline-none"
         />
         <button
@@ -24,19 +80,10 @@ export default function PromptInput() {
         >
           Generate
         </button>
-        <button
-          type="button"
-          className="p-4 font-bold text-white transition-colors duration-200 bg-violet-400 disabled:text-gray-300 disabled:cursor-not-allowed disabled:bg-gray-400"
-        >
-          Use Suggestion
-        </button>
-        <button
-          type="button"
-          className="p-4 font-bold transition-colors duration-200 bg-white border-none text-violet-500 rounded-b-md md:rounded-r-md md:rounded-bl-none"
-        >
-          New Suggestion
-        </button>
+       
       </form>
+
+    
     </div>
   )
 }
