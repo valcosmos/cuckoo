@@ -14,7 +14,14 @@ export default function PromptInput() {
           placeholder="Enter a prompt..."
           className="flex-1 p-4 rounded-md outline-none"
         />
-        <button type="submit" className="">
+        <button
+          type="submit"
+          className={`p-4 ${
+            input
+              ? 'bg-violet-500 text-white transition-colors duration-200'
+              : 'text-gray-300 cursor-not-allowed'
+          }`}
+        >
           Generate
         </button>
         <button
