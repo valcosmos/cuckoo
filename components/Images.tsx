@@ -28,11 +28,11 @@ function Images() {
                 Loading <span className="text-violet-400">AI</span> Generated Images...
               </p>
             ) : (
-              <Image
+              <img
                 src={image.url}
                 alt=""
-                height={800}
-                width={800}
+                // height={800}
+                // width={800}
                 className="w-full rounded-sm shadow-2xl drop-shadow-lg -z-10"
               />
             )}
